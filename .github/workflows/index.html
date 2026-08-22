@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Kenya Premier League Mobile Arcade</title>
+
+<style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #030d08;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+header {
+  width: 100%;
+  background: linear-gradient(135deg, #00843d, #005226);
+  padding: 12px;
+  text-align: center;
+  border-bottom: 3px solid #f9d342;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
+
+h1 {
+  color: #f9d342;
+  font-size: 20px;
+  letter-spacing: 1px;
+}
+
+.sub-header {
+  color: #e0e0e0;
+  font-size: 11px;
+}
+
+.container {
+  width: 100%;
+  max-width: 500px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.setup-card {
+  width: 100%;
+  background: #0d281a;
+  border: 1px solid #1a4d31;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+
+.select-group {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.select-box {
+  flex: 1;
+}
+
+label {
+  display: block;
+  font-size: 11px;
+  color: #f9d342;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+select {
+  width: 100%;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #00843d;
+  background: #071b12;
+  color: #ffffff;
+  font-size: 13px;
+  outline: none;
+}
+
+.btn-main {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  background: #f9d342;
+  color: #030d08;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.score-board {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #0a2115;
+  border: 2px solid #165233;
+  border-radius: 10px;
+  padding: 8px 15px;
+  margin-bottom: 8px;
+}
+
+.team-display {
+  text-align: center;
+  flex: 1;
+}
+
+.team-name {
+  font-size: 12px;
+  font-weight: bold;
+  color: #cccccc;
+}
+
+.score-num {
+  font-size: 26px;
+  font-weight: bold;
+  color: #f9d342;
+}
+
+.timer-box {
+  text-align: center;
+  padding: 0 10px;
+}
+
+.timer-val {
+  font-size: 18px;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.field-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4/3;
+  background: #116833;
+  border: 3px solid #ffffff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: inset 0 0 40px rgba(0,0,0,0.5);
+  touch-action: none;
+}
+
+.pitch-line {
+  position: absolute;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  pointer-events: none;
+}
+
+.center-line {
+  top: 0; bottom: 0; left: 50%; width: 0; transform: translateX(-50%);
+}
+
+.center-circle {
+  top: 50%; left: 50%; width: 70px; height: 70px; border-radius: 50%; transform: translate(-50%, -50%);
+}
+
+.goal-left, .goal-right {
+  position: absolute; top: 35%; bottom: 35%; width: 3%; background: rgba(255,255,255,0.3); border: 2px solid #fff;
+}
+.goal-left { left: 0; border-left: none; }
+.goal-right { right: 0; border-right: none; }
+
+.entity {
+  position: absolute;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  font-size: 10px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+}
+
+#player { width: 20px; height: 20px; background: #00e5ff; border: 2px solid #ffffff; color: #000; z-index: 10; }
+#ai { width: 20px; height: 20px; background: #ff3d00; border: 2px solid #ffffff; color: #fff; z-index: 10; }
+#ball { width: 12px; height: 12px; background: #ffffff; border: 1px solid #000; z-index: 12; }
+
+/* Mobile Touch Overlay Controls */
+.touch-zone {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  padding: 0 10px;
+}
+
+.joystick-base {
+  width: 100px;
+  height: 100px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  position: relative;
+  touch-action: none;
+}
+
+.joystick-stick {
+  width: 40px;
+  height: 40px;
+  background: #f9d342;
+  border-radius: 50%;
+  position: absolute;
+  top: 30px;
+  left: 30px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+  pointer-events: none;
+}
+
+.action-btns-mobile {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.btn-mobile {
+  width: 75px;
+  height: 45px;
+  border: none;
+  border-radius: 22px;
+  color: #fff;
+  font-weight: bold;
+  font-size: 12px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.4);
+}
+
+#status-msg {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #f9d342;
+  font-weight: bold;
+  text-align: center;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>🇰🇪 KENYA PREMIER LEAGUE</h1>
+  <div class="sub-header">Mobile Touch Arcade Edition</div>
+</header>
+
+<div class="container">
+
+  <div class="setup-card">
+    <div class="select-group">
+      <div class="select-box">
+        <label>Home (You)</label>
+        <select id="homeTeam">
+          <option>Gor Mahia</option>
+          <option>AFC Leopards</option>
+          <option>Tusker FC</option>
+          <option>Kenya Police FC</option>
+        </select>
+      </div>
+      <div class="select-box">
+        <label>Away (CPU)</label>
+        <select id="awayTeam">
+          <option>AFC Leopards</option>
+          <option>Gor Mahia</option>
+          <option>Tusker FC</option>
+          <option>Kenya Police FC</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn-main" onclick="initMatch()">KICK OFF</button>
+  </div>
+
+  <div class="score-board">
+    <div class="team-display">
+      <div class="team-name" id="homeDisplay">HOME</div>
+      <div class="score-num" id="homeScore">0</div>
+    </div>
+    <div class="timer-box">
+      <div class="timer-val" id="timer">90</div>
+    </div>
+    <div class="team-display">
+      <div class="team-name" id="awayDisplay">AWAY</div>
+      <div class="score-num" id="awayScore">0</div>
+    </div>
+  </div>
+
+  <div class="field-wrapper" id="field">
+    <div class="pitch-line center-line"></div>
+    <div class="pitch-line center-circle"></div>
+    <div class="goal-left"></div>
+    <div class="goal-right"></div>
+
+    <div id="player" class="entity">P</div>
+    <div id="ai" class="entity">AI</div>
+    <div id="ball" class="entity"></div>
+  </div>
+
+  <div id="status-msg">Tap Joystick or Swipe pitch to play!</div>
+
+  <div class="touch-zone">
+    <!-- Touch Joystick -->
+    <div class="joystick-base" id="joyBase">
+      <div class="joystick-stick" id="joyStick"></div>
+    </div>
+
+    <!-- Mobile Action Buttons -->
+    <div class="action-btns-mobile">
+      <button class="btn-mobile" style="background:#00843d;" onclick="shoot()">⚽ SHOOT</button>
+      <button class="btn-mobile" style="background:#1a4d31;" onclick="passBall()">👟 PASS</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// Web Audio API
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function playSound(type) {
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+
+  if (type === 'kick') {
+    osc.frequency.setValueAtTime(120, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + 0.1);
+    gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+    osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+  } else if (type === 'goal') {
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+    osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.15);
+    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.6);
+    osc.start(); osc.stop(audioCtx.currentTime + 0.6);
+  } else if (type === 'whistle') {
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(1800, audioCtx.currentTime);
+    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+    osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+  }
+}
+
+// Game Logic
+let pPos = { x: 30, y: 50 };
+let aiPos = { x: 70, y: 50 };
+let bPos = { x: 50, y: 50 };
+let bVel = { x: 0, y: 0 };
+let joyVector = { x: 0, y: 0 };
+
+let hScore = 0;
+let aScore = 0;
+let matchTime = 90;
+let active = false;
+let clockInterval = null;
+
+const pEl = document.getElementById('player');
+const aiEl = document.getElementById('ai');
+const bEl = document.getElementById('ball');
+const msgEl = document.getElementById('status-msg');
+
+function initMatch() {
+  hScore = 0;
+  aScore = 0;
+  matchTime = 90;
+  active = true;
+
+  document.getElementById('homeDisplay').innerText = document.getElementById('homeTeam').value;
+  document.getElementById('awayDisplay').innerText = document.getElementById('awayTeam').value;
+  document.getElementById('homeScore').innerText = hScore;
+  document.getElementById('awayScore').innerText = aScore;
+
+  resetPositions();
+  playSound('whistle');
+  msgEl.innerText = "Match in progress!";
+
+  if (clockInterval) clearInterval(clockInterval);
+  clockInterval = setInterval(updateClock, 1000);
+
+  requestAnimationFrame(gameLoop);
+}
+
+function resetPositions() {
+  pPos = { x: 30, y: 50 };
+  aiPos = { x: 70, y: 50 };
+  bPos = { x: 50, y: 50 };
+  bVel = { x: 0, y: 0 };
+  render();
+}
+
+function updateClock() {
+  if (!active) return;
+  matchTime--;
+  document.getElementById('timer').innerText = matchTime;
+
+  if (matchTime <= 0) {
+    active = false;
+    clearInterval(clockInterval);
+    playSound('whistle');
+    let res = hScore > aScore ? "YOU WIN! 🏆" : (aScore > hScore ? "CPU WINS! ❌" : "DRAW! 🤝");
+    msgEl.innerText = "FULL TIME: " + res;
+  }
+}
+
+function passBall() {
+  if (!active) return;
+  if (Math.hypot(pPos.x - bPos.x, pPos.y - bPos.y) < 8) {
+    bVel.x = 1.8;
+    bVel.y = (Math.random() - 0.5) * 0.5;
+    playSound('kick');
+  }
+}
+
+function shoot() {
+  if (!active) return;
+  if (Math.hypot(pPos.x - bPos.x, pPos.y - bPos.y) < 8) {
+    bVel.x = 3.0;
+    bVel.y = (35 - pPos.y) * 0.05;
+    playSound('kick');
+  }
+}
+
+// Touch Joystick Logic
+const joyBase = document.getElementById('joyBase');
+const joyStick = document.getElementById('joyStick');
+
+joyBase.addEventListener('touchmove', (e) => {
+  e.preventDefault();
+  const rect = joyBase.getBoundingClientRect();
+  const touch = e.touches[0];
+  let dx = touch.clientX - (rect.left + rect.width / 2);
+  let dy = touch.clientY - (rect.top + rect.height / 2);
+  let dist = Math.hypot(dx, dy);
+  let maxDist = 30;
+
+  if (dist > maxDist) {
+    dx = (dx / dist) * maxDist;
+    dy = (dy / dist) * maxDist;
+  }
+
+  joyStick.style.left = (30 + dx) + 'px';
+  joyStick.style.top = (30 + dy) + 'px';
+
+  joyVector.x = dx / maxDist;
+  joyVector.y = dy / maxDist;
+});
+
+joyBase.addEventListener('touchend', () => {
+  joyStick.style.left = '30px';
+  joyStick.style.top = '30px';
+  joyVector = { x: 0, y: 0 };
+});
+
+// Pitch Gesture Swipe (Alternative Control)
+let touchStartX = 0;
+let touchStartY = 0;
+const fieldEl = document.getElementById('field');
+
+fieldEl.addEventListener('touchstart', (e) => {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+});
+
+fieldEl.addEventListener('touchend', (e) => {
+  let dx = e.changedTouches[0].clientX - touchStartX;
+  let dy = e.changedTouches[0].clientY - touchStartY;
+  if (Math.abs(dx) > 30 && dx > 0) {
+    shoot();
+  } else if (Math.abs(dy) > 30) {
+    passBall();
+  }
+});
+
+function gameLoop() {
+  if (active) {
+    // Joystick Player Motion
+    pPos.x = Math.max(5, Math.min(95, pPos.x + joyVector.x * 0.8));
+    pPos.y = Math.max(5, Math.min(95, pPos.y + joyVector.y * 0.8));
+
+    // Ball Dribble Mechanics
+    if (Math.hypot(pPos.x - bPos.x, pPos.y - bPos.y) < 5) {
+      bPos.x = pPos.x + 2;
+      bPos.y = pPos.y;
+    }
+
+    // Ball Friction Physics
+    bPos.x += bVel.x;
+    bPos.y += bVel.y;
+    bVel.x *= 0.88;
+    bVel.y *= 0.88;
+
+    // AI Tracking
+    if (bPos.x > 30) {
+      if (aiPos.x > bPos.x) aiPos.x -= 0.5;
+      else aiPos.x += 0.5;
+      if (aiPos.y > bPos.y) aiPos.y -= 0.5;
+      else aiPos.y += 0.5;
+    }
+
+    // Goals Check
+    if (bPos.x >= 97 && bPos.y >= 35 && bPos.y <= 65) {
+      hScore++;
+      document.getElementById('homeScore').innerText = hScore;
+      playSound('goal');
+      msgEl.innerText = "⚽ GOAL!";
+      resetPositions();
+    } else if (bPos.x <= 3 && bPos.y >= 35 && bPos.y <= 65) {
+      aScore++;
+      document.getElementById('awayScore').innerText = aScore;
+      playSound('goal');
+      msgEl.innerText = "❌ GOAL CONCEDED!";
+      resetPositions();
+    }
+
+    render();
+    requestAnimationFrame(gameLoop);
+  }
+}
+
+function render() {
+  pEl.style.left = pPos.x + '%';
+  pEl.style.top = pPos.y + '%';
+  aiEl.style.left = aiPos.x + '%';
+  aiEl.style.top = aiPos.y + '%';
+  bEl.style.left = bPos.x + '%';
+  bEl.style.top = bPos.y + '%';
+}
+</script>
+
+</body>
+</html>
