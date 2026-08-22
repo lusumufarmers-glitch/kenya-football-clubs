@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kenya Football Clubs</title>
+
+<style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: #071b12;
+  color: white;
+  text-align: center;
+}
+
+header {
+  background: #00843d;
+  padding: 18px;
+  border-bottom: 4px solid #f9d342;
+}
+
+h1 {
+  color: #f9d342;
+  font-size: 28px;
+}
+
+.container {
+  max-width: 700px;
+  margin: auto;
+  padding: 20px;
+}
+
+select, button {
+  width: 100%;
+  padding: 14px;
+  margin: 8px 0;
+  border: none;
+  border-radius: 10px;
+  font-size: 17px;
+}
+
+select {
+  background: white;
+  color: black;
+}
+
+button {
+  background: #f9d342;
+  color: #111;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #ffffff;
+}
+
+.score {
+  display: flex;
+  justify-content: space-around;
+  background: #123d28;
+  padding: 20px;
+  margin: 20px 0;
+  border-radius: 15px;
+}
+
+.team {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.goals {
+  font-size: 45px;
+  color: #f9d342;
+}
+
+.field {
+  position: relative;
+  width: 100%;
+  height: 400px;
+  background: #168a43;
+  border: 5px solid white;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.line {
+  position: absolute;
+  background: white;
+}
+
+.center-line {
+  width: 4px;
+  height: 100%;
+  left: 50%;
+}
+
+.center-circle {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  border: 3px solid white;
+  border-radius: 50%;
+  left: calc(50% - 50px);
+  top: calc(50% - 50px);
+}
+
+.ball {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  background: white;
+  border-radius: 50%;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 8px black;
+}
+
+.controls {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 15px;
+}
+
+.controls button {
+  margin: 0;
+}
+
+#message {
+  margin: 15px;
+  color: #f9d342;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+footer {
+  margin-top: 25px;
+  padding: 15px;
+  color: #aaa;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>🇰🇪 KENYA FOOTBALL CLUBS</h1>
+  <p>Kenyan Football Game</p>
+</header>
+
+<div class="container">
+
+  <h2>Choose Your Teams</h2>
+
+  <select id="homeTeam">
+    <option>Gor Mahia</option>
+    <option>AFC Leopards</option>
+    <option>Kenya Police FC</option>
+    <option>Tusker FC</option>
+    <option>Kakamega Homeboyz</option>
+    <option>Bandari FC</option>
+    <option>Ulinzi Stars</option>
+    <option>Kariobangi Sharks</option>
+    <option>Shabana FC</option>
+    <option>Sofapaka FC</option>
+    <option>Mathare United</option>
+    <option>Bidco United</option>
+  </select>
+
+  <select id="awayTeam">
+    <option>AFC Leopards</option>
+    <option>Gor Mahia</option>
+    <option>Kenya Police FC</option>
+    <option>Tusker FC</option>
+    <option>Kakamega Homeboyz</option>
+    <option>Bandari FC</option>
+    <option>Ulinzi Stars</option>
+    <option>Kariobangi Sharks</option>
+    <option>Shabana FC</option>
+    <option>Sofapaka FC</option>
+    <option>Mathare United</option>
+    <option>Bidco United</option>
+  </select>
+
+  <button onclick="startGame()">START MATCH</button>
+
+  <div class="score">
+    <div>
+      <div class="team" id="homeName">Gor Mahia</div>
+      <div class="goals" id="homeScore">0</div>
+    </div>
+
+    <div>
+      <div class="team" id="awayName">AFC Leopards</div>
+      <div class="goals" id="awayScore">0</div>
+    </div>
+  </div>
+
+  <div id="timer">Time: 90</div>
+
+  <div class="field" id="field">
+    <div class="line center-line"></div>
+    <div class="center-circle"></div>
+    <div class="ball" id="ball"></div>
+  </div>
+
+  <div class="controls">
+    <button onclick="moveBall('up')">⬆️</button>
+    <button onclick="kick()">⚽ KICK</button>
+    <button onclick="moveBall('down')">⬇️</button>
+
+    <button onclick="moveBall('left')">⬅️</button>
+    <button onclick="passBall()">PASS</button>
+    <button onclick="moveBall('right')">➡️</button>
+  </div>
+
+  <div id="message">Select teams and press START MATCH</div>
+
+  <button onclick="newMatch()">NEW MATCH</button>
+
+</div>
+
+<footer>
+  Kenya Football Clubs Game 🇰🇪
+</footer>
+
+<script>
+
+let homeScore = 0;
+let awayScore = 0;
+let time = 90;
+let gameRunning = false;
+let timer;
+
+const ball = document.getElementById("ball");
+const field = document.getElementById("field");
+
+function startGame() {
+
+  homeScore = 0;
+  awayScore = 0;
+  time = 90;
+
+  document.getElementById("homeScore").innerText = 0;
+  document.getElementById("awayScore").innerText = 0;
+
+  document.getElementById("homeName").innerText =
+    document.getElementById("homeTeam").value;
+
+  document.getElementById("awayName").innerText =
+    document.getElementById("awayTeam").value;
+
+  document.getElementById("message").innerText =
+    "MATCH STARTED! ⚽";
+
+  gameRunning = true;
+
+  clearInterval(timer);
+
+  timer = setInterval(function() {
+
+    if (!gameRunning) return;
+
+    time--;
+
+    document.getElementById("timer").innerText =
+      "Time: " + time;
+
+    if (time <= 0) {
+      clearInterval(timer);
+      gameRunning = false;
+
+      let winner;
+
+      if (homeScore > awayScore) {
+        winner = document.getElementById("homeName").innerText + " WINS! 🏆";
+      } else if (awayScore > homeScore) {
+        winner = document.getElementById("awayName").innerText + " WINS! 🏆";
+      } else {
+        winner = "DRAW! 🤝";
+      }
+
+      document.getElementById("message").innerText = winner;
+    }
+
+  }, 1000);
+}
+
+function moveBall(direction) {
+
+  if (!gameRunning) return;
+
+  let x = ball.offsetLeft;
+  let y = ball.offsetTop;
+
+  if (direction === "up") y -= 20;
+  if (direction === "down") y += 20;
+  if (direction === "left") x -= 20;
+  if (direction === "right") x += 20;
+
+  x = Math.max(5, Math.min(field.clientWidth - 33, x));
+  y = Math.max(5, Math.min(field.clientHeight - 33, y));
+
+  ball.style.left = x + "px";
+  ball.style.top = y + "px";
+  ball.style.transform = "none";
+}
+
+function kick() {
+
+  if (!gameRunning) return;
+
+  let chance = Math.random();
+
+  if (chance > 0.65) {
+
+    homeScore++;
+
+    document.getElementById("homeScore").innerText =
+      homeScore;
+
+    document.getElementById("message").innerText =
+      "⚽ GOAL FOR " +
+      document.getElementById("homeName").innerText + "!";
+
+  } else {
+
+    document.getElementById("message").innerText =
+      "❌ MISS!";
+
+  }
+}
+
+function passBall() {
+
+  if (!gameRunning) return;
+
+  document.getElementById("message").innerText =
+    "Great pass! 👟⚽";
+
+}
+
+function newMatch() {
+
+  clearInterval(timer);
+
+  gameRunning = false;
+
+  homeScore = 0;
+  awayScore = 0;
+  time = 90;
+
+  document.getElementById("homeScore").innerText = 0;
+  document.getElementById("awayScore").innerText = 0;
+  document.getElementById("timer").innerText = "Time: 90";
+
+  ball.style.left = "50%";
+  ball.style.top = "50%";
+  ball.style.transform = "translate(-50%, -50%)";
+
+  document.getElementById("message").innerText =
+    "Select teams and press START MATCH";
+}
+
+</script>
+
+</body>
+</html>
